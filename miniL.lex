@@ -2,10 +2,7 @@
 %{   
 /* write your C code here for definitions of variables and including headers */
 int currLine = 1, currpos = 1;
-int numIntegers = 0;
-int numOperators = 0;
-int munParens = 0;
-int numEquals = 0;
+
 %}
    /* some common rules */
 DIGIT	[0-9]
