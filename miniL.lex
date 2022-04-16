@@ -10,7 +10,8 @@ int numEquals = 0;
    /* some common rules */
 DIGIT	[0-9]
 LETTER	[a-z|A-Z]
- 
+IDENT	{LETTER}([_]*{LETTER}*{DIGIT}*)*({LETTER}|{DIGIT})
+
 %%
  /* specific lexer rules in regex */
 "function"	{printf("FUNCTION\n"); currpos += yyleng;}
@@ -57,8 +58,12 @@ LETTER	[a-z|A-Z]
 "<="		{printf("LTE\n"); currpos += yyleng;}
 ">="		{printf("GTE\n"); currpos += yyleng;}
 
-{DIGIT}+        {printf("NUMBER %s\n", yytext);currpos += yyleng;}	 
-[a-zA-Z0-9_]*[_] {printf("Error at line %d, column %d: identifier \"%s\" cannot end with an underscore\n", currpos, currLine, yytext); exit(0);}
+{DIGIT}+        {printf("NUMBER %s\n", yytext);currpos += yyleng;}
+{LETTER}	{printf("IDENT %s\n", yytext); currpos += yyleng;} 
+{IDENT}         {printf("IDENT %s\n", yytext); currpos += yyleng;} 
+([_]+{DIGIT}*{IDENT}*)    {printf("Error at line %d, column %d: identifier \"%s\" cannot start with an underscore\n", currpos, currLine, yytext); exit(0);}
+({IDENT}[_])    {printf("Error at line %d, column %d: identifier \"%s\" cannot end with an underscore\n", currpos, currLine, yytext); exit(0);}
+({DIGIT}+{IDENT}) {printf("Error at line %d, column %d: identifier \"%s\" must begin with a letter\n", currpos, currLine, yytext); exit(0);}
 
 ";"		{printf("SEMICOLON\n"); currpos += yyleng;}
 ":"		{printf("COLON\n"); currpos += yyleng;}
@@ -69,6 +74,8 @@ LETTER	[a-z|A-Z]
 "]"		{printf("R_SQUARE_BRACKET\n"); currpos += yyleng;}
 ":="		{printf("ASSIGN\n"); currpos += yyleng;}
 
+[##].* 		{currLine++; currpos = 1;}
+[ ] 		{currpos += yyleng;}
 [ \t]           {currpos += yyleng;}
 "\n"            {currLine++; currpos = 1;}
 
@@ -78,5 +85,15 @@ LETTER	[a-z|A-Z]
  /* C functions used in lexer */
 int main(int argc, char ** argv)
 {
-   yylex();
+  yylex();
+  if (argc >= 2) {
+    if (yyin == NULL) {
+      yyin = stdin;
+    }
+  }
+  else {
+    yyin = stdin;
+  }
+  yylex();
+  return 0;
 }
